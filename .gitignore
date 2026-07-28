@@ -150,6 +150,10 @@ activemq-data/
 # Environments
 .env
 .envrc
+
+# Machine-specific bot config (real project paths) — see bot_config.example.json
+bot_config.json
+*.log
 .venv
 env/
 venv/
