@@ -12,7 +12,7 @@ import logging
 from telegram import Update
 from telegram.ext import Application, CommandHandler, TypeHandler
 
-from otacon_bot import config, handlers
+from otacon_bot import config, handlers, outbox
 from otacon_bot.auth import auth_gate
 
 logging.basicConfig(
@@ -26,10 +26,17 @@ logging.getLogger("httpx").setLevel(logging.WARNING)
 logger = logging.getLogger(__name__)
 
 
+async def _post_init(application: Application) -> None:
+    # Runs once the application's own event loop is up - the clean PTB
+    # hook for attaching a background task without a second manually
+    # managed event loop or the job-queue/APScheduler extra.
+    outbox.start_outbox_watcher(application.bot)
+
+
 def build_application() -> Application:
     config.validate()
 
-    application = Application.builder().token(config.BOT_TOKEN).build()
+    application = Application.builder().token(config.BOT_TOKEN).post_init(_post_init).build()
 
     # group=-1 runs before the default group (0), so this gate sees every
     # update first, for every command handler below and any added later.

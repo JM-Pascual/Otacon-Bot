@@ -31,6 +31,27 @@ point, not a check that lives only in the `/new` handler).
 Not in v1 (deliberately out of scope): free-text prompt relay into a
 running session, Discord, webhook mode, multi-user support.
 
+## Sending media from a Claude Code session back to Telegram
+
+Any `claude` session this bot spawns can push an image, video, or other
+file to your Telegram chat by dropping it in `/tmp/otacon-outbox/` —
+the bot watches that folder (via `watchdog`) and forwards new files
+automatically, usually within a couple seconds. `.png`/`.jpg`/`.jpeg`/
+`.webp` are sent as inline photos, `.mp4`/`.mov` as inline playable
+videos, everything else as a generic document (~50MB cap per file, no
+daily limit). Successfully sent files move to
+`/tmp/otacon-outbox/sent/`; failures move to
+`/tmp/otacon-outbox/failed/` and are logged. Being under `/tmp`, the
+whole folder is cleared automatically on reboot — nothing to clean up
+manually.
+
+This is taught to agents via a global Claude Code skill at
+`~/.claude/skills/send-to-telegram/SKILL.md` (with a bundled
+`send_to_telegram.sh` helper script), so it's outside this repo
+entirely and available in every allowlisted project without per-repo
+setup. The bot token never leaves this bot process — spawned sessions
+only ever need to know the drop-folder convention, not any credential.
+
 ---
 
 ## 1. Set up the bot with BotFather (you do this manually)

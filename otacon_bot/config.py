@@ -98,6 +98,26 @@ CLAUDE_BIN: str | None = shutil.which("claude")
 SESSION_PREFIX = "otacon"
 MAX_SESSIONS_PER_PROJECT = 3
 
+# Drop folder for agents to push media into for delivery to Telegram
+# (see otacon_bot/outbox.py). Deliberately in /tmp, not the repo or
+# $HOME: never git-committable regardless of which project an agent is
+# running in, and macOS clears /tmp on reboot so sent/failed archives
+# can't grow unbounded.
+OUTBOX_DIR = Path("/tmp/otacon-outbox")
+OUTBOX_SENT_DIR = OUTBOX_DIR / "sent"
+OUTBOX_FAILED_DIR = OUTBOX_DIR / "failed"
+
+IMAGE_EXTS = {".png", ".jpg", ".jpeg", ".webp"}
+VIDEO_EXTS = {".mp4", ".mov"}
+
+# Separate drop folder for plain text (sent via bot.send_message, not as
+# a file attachment) - e.g. a status update or a final message from a
+# session closing itself via the end-session skill.
+OUTBOX_MESSAGES_DIR = OUTBOX_DIR / "messages"
+OUTBOX_MESSAGES_SENT_DIR = OUTBOX_MESSAGES_DIR / "sent"
+OUTBOX_MESSAGES_FAILED_DIR = OUTBOX_MESSAGES_DIR / "failed"
+MAX_MESSAGE_CHARS = 4096  # Telegram's sendMessage text length cap
+
 
 def validate() -> None:
     """Fail fast and loud at startup if the environment is unusable.
